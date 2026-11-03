@@ -6,7 +6,7 @@
 
 > 本项目是竞赛工程，当前实物采用电机直接驱动连杆。电机编码器count闭合位置内环；源码未显式将电机轴角转换为摆杆倾角。GPIO、方向、编码器符号、视觉阈值和控制参数均需结合实物复核。
 
-原题与两份分析报告见[文档说明](docs/README.md)；第三方来源见[第三方来源说明](THIRD_PARTY_NOTICES.md)。
+原题与三份分析报告见[文档说明](docs/README.md)；第三方来源见[第三方来源说明](THIRD_PARTY_NOTICES.md)。
 
 ## 系统架构
 
@@ -140,7 +140,7 @@ GearRackMechanism/
 |- Esp32 S3 MainWork/          ESP32-S3 滚球集中处理器
 |- K230VideoReceiver/          主 K230 脚本、Windows 上位机与调试接收器
 |- K230StandaloneMjpeg/        第二块 K230 的独立 HTTP MJPEG 服务
-|- docs/                       原题、两份分析报告与文档说明
+|- docs/                       原题、三份分析报告与文档说明
 |- TASK_COMMUNICATION_FLOW.md  任务通信与运行流程
 `- LICENSE                     根工程 MIT 许可证
 ```
