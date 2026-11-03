@@ -1,0 +1,208 @@
+/**
+ * H题巡线子系统最小配置。
+ *
+ * 八路巡线模块(0x12)和 JY901S(0x50)共用 I2C0，
+ * 屏幕、按键、TB6612、编码器和日志串口沿用 TianMengXinTest_v2 引脚。
+ * @cliArgs --device "MSPM0G350X" --part "Default" --package "LQFP-64(PM)" --product "mspm0_sdk@2.10.00.04"
+ * @v2CliArgs --device "MSPM0G3507" --package "LQFP-64(PM)" --product "mspm0_sdk@2.10.00.04"
+ * @versions {"tool":"1.26.2+4477"}
+ */
+
+const GPIO   = scripting.addModule("/ti/driverlib/GPIO", {}, false);
+const GPIO1  = GPIO.addInstance();
+const GPIO2  = GPIO.addInstance();
+const GPIO3  = GPIO.addInstance();
+const GPIO4  = GPIO.addInstance();
+const GPIO5  = GPIO.addInstance();
+const GPIO6  = GPIO.addInstance();
+const PWM    = scripting.addModule("/ti/driverlib/PWM", {}, false);
+const PWM1   = PWM.addInstance();
+const TIMER  = scripting.addModule("/ti/driverlib/TIMER", {}, false);
+const TIMER1 = TIMER.addInstance();
+const SPI    = scripting.addModule("/ti/driverlib/SPI", {}, false);
+const SPI1   = SPI.addInstance();
+const I2C    = scripting.addModule("/ti/driverlib/I2C", {}, false);
+const I2C1   = I2C.addInstance();
+const UART   = scripting.addModule("/ti/driverlib/UART", {}, false);
+const UART1  = UART.addInstance();
+const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
+const Board  = scripting.addModule("/ti/driverlib/Board", {}, false);
+
+/* 天猛星板载状态 LED。 */
+GPIO1.$name                          = "LED";
+GPIO1.port                           = "PORTB";
+GPIO1.associatedPins[0].$name        = "PIN";
+GPIO1.associatedPins[0].ioStructure  = "SD";
+GPIO1.associatedPins[0].assignedPin  = "22";
+GPIO1.associatedPins[0].pin.$assign  = "PB22";
+
+/* ST7735S 1.8 寸屏控制线，数据线见 SPI_LCD。 */
+GPIO2.$name                         = "LCD";
+GPIO2.port                          = "PORTB";
+GPIO2.associatedPins.create(4);
+GPIO2.associatedPins[0].$name       = "RES";
+GPIO2.associatedPins[0].ioStructure = "SD";
+GPIO2.associatedPins[0].assignedPin = "10";
+GPIO2.associatedPins[0].pin.$assign = "PB10";
+GPIO2.associatedPins[1].$name       = "DC";
+GPIO2.associatedPins[1].ioStructure = "SD";
+GPIO2.associatedPins[1].assignedPin = "11";
+GPIO2.associatedPins[1].pin.$assign = "PB11";
+GPIO2.associatedPins[2].$name       = "CS";
+GPIO2.associatedPins[2].ioStructure = "SD";
+GPIO2.associatedPins[2].assignedPin = "14";
+GPIO2.associatedPins[2].pin.$assign = "PB14";
+GPIO2.associatedPins[3].$name       = "BLK";
+GPIO2.associatedPins[3].ioStructure = "SD";
+GPIO2.associatedPins[3].assignedPin = "26";
+GPIO2.associatedPins[3].pin.$assign = "PB26";
+
+/* T1 启动/菜单按键，低电平有效。 */
+GPIO3.$name                              = "KEY";
+GPIO3.port                               = "PORTB";
+GPIO3.associatedPins[0].$name            = "K1";
+GPIO3.associatedPins[0].direction        = "INPUT";
+GPIO3.associatedPins[0].internalResistor = "PULL_UP";
+GPIO3.associatedPins[0].assignedPin      = "21";
+GPIO3.associatedPins[0].pin.$assign      = "PB21";
+
+/* TB6612 方向线，PWM 由 TIMA1 输出。 */
+GPIO4.$name                         = "TB6612";
+GPIO4.port                          = "PORTA";
+GPIO4.associatedPins.create(4);
+GPIO4.associatedPins[0].$name       = "AIN1";
+GPIO4.associatedPins[0].ioStructure = "SD";
+GPIO4.associatedPins[0].assignedPin = "7";
+GPIO4.associatedPins[0].pin.$assign = "PA7";
+GPIO4.associatedPins[1].$name       = "AIN2";
+GPIO4.associatedPins[1].ioStructure = "HS";
+GPIO4.associatedPins[1].assignedPin = "14";
+GPIO4.associatedPins[1].pin.$assign = "PA14";
+GPIO4.associatedPins[2].$name       = "BIN1";
+GPIO4.associatedPins[2].ioStructure = "SD";
+GPIO4.associatedPins[2].assignedPin = "22";
+GPIO4.associatedPins[2].pin.$assign = "PA22";
+GPIO4.associatedPins[3].$name       = "BIN2";
+GPIO4.associatedPins[3].ioStructure = "SD";
+GPIO4.associatedPins[3].assignedPin = "15";
+GPIO4.associatedPins[3].pin.$assign = "PA15";
+
+GPIO5.$name                         = "STBY";
+GPIO5.port                          = "PORTB";
+GPIO5.associatedPins[0].$name       = "STBY_PIN";
+GPIO5.associatedPins[0].ioStructure = "SD";
+GPIO5.associatedPins[0].assignedPin = "23";
+GPIO5.associatedPins[0].pin.$assign = "PB23";
+
+/* 双路正交编码器，边沿中断由后续 BSP 开启。 */
+GPIO6.$name                         = "ENC1";
+GPIO6.port                          = "PORTB";
+GPIO6.associatedPins.create(2);
+GPIO6.associatedPins[0].$name       = "E1A";
+GPIO6.associatedPins[0].direction   = "INPUT";
+GPIO6.associatedPins[0].assignedPin = "6";
+GPIO6.associatedPins[0].pin.$assign = "PB6";
+GPIO6.associatedPins[1].$name       = "E1B";
+GPIO6.associatedPins[1].direction   = "INPUT";
+GPIO6.associatedPins[1].assignedPin = "27";
+GPIO6.associatedPins[1].pin.$assign = "PB27";
+
+const GPIO7 = GPIO.addInstance();
+GPIO7.$name                         = "ENC2";
+GPIO7.port                          = "PORTA";
+GPIO7.associatedPins.create(2);
+GPIO7.associatedPins[0].$name       = "E2A";
+GPIO7.associatedPins[0].direction   = "INPUT";
+GPIO7.associatedPins[0].assignedPin = "12";
+GPIO7.associatedPins[0].pin.$assign = "PA12";
+GPIO7.associatedPins[1].$name       = "E2B";
+GPIO7.associatedPins[1].direction   = "INPUT";
+GPIO7.associatedPins[1].assignedPin = "13";
+GPIO7.associatedPins[1].pin.$assign = "PA13";
+
+PWM1.$name                              = "PWM_TB6612";
+PWM1.timerCount                         = 1000;
+PWM1.peripheral.$assign                 = "TIMA1";
+PWM1.peripheral.ccp0Pin.$assign         = "PB0";
+PWM1.peripheral.ccp1Pin.$assign         = "PB1";
+PWM1.PWM_CHANNEL_0.$name                = "PWM_B";
+PWM1.PWM_CHANNEL_0.dutyCycle            = 0;
+PWM1.PWM_CHANNEL_1.$name                = "PWM_A";
+PWM1.PWM_CHANNEL_1.dutyCycle            = 0;
+PWM1.ccp0PinConfig.direction            = scripting.forceWrite("OUTPUT");
+PWM1.ccp0PinConfig.hideOutputInversion  = scripting.forceWrite(false);
+PWM1.ccp0PinConfig.onlyInternalResistor = scripting.forceWrite(false);
+PWM1.ccp0PinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+PWM1.ccp0PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric0";
+PWM1.ccp1PinConfig.direction            = scripting.forceWrite("OUTPUT");
+PWM1.ccp1PinConfig.hideOutputInversion  = scripting.forceWrite(false);
+PWM1.ccp1PinConfig.onlyInternalResistor = scripting.forceWrite(false);
+PWM1.ccp1PinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+PWM1.ccp1PinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric1";
+
+/* 1 ms 裸机控制时基，也用于行驶计时。 */
+TIMER1.$name              = "TIMER_CONTROL";
+TIMER1.timerMode          = "PERIODIC";
+TIMER1.timerPeriod        = "1 ms";
+TIMER1.interrupts         = ["ZERO"];
+TIMER1.timerClkSrc        = "MFCLK";
+TIMER1.peripheral.$assign = "TIMG8";
+
+SPI1.$name                              = "SPI_LCD";
+SPI1.frameFormat                        = "MOTO3";
+SPI1.targetBitRate                      = 8000000;
+SPI1.peripheral.$assign                 = "SPI1";
+SPI1.peripheral.sclkPin.$assign         = "PB9";
+SPI1.peripheral.mosiPin.$assign         = "PB8";
+SPI1.peripheral.misoPin.$assign         = "PB7";
+SPI1.sclkPinConfig.direction            = scripting.forceWrite("OUTPUT");
+SPI1.sclkPinConfig.onlyInternalResistor = scripting.forceWrite(false);
+SPI1.sclkPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+SPI1.sclkPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric2";
+SPI1.mosiPinConfig.direction            = scripting.forceWrite("OUTPUT");
+SPI1.mosiPinConfig.hideOutputInversion  = scripting.forceWrite(false);
+SPI1.mosiPinConfig.onlyInternalResistor = scripting.forceWrite(false);
+SPI1.mosiPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+SPI1.mosiPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric3";
+SPI1.misoPinConfig.onlyInternalResistor = scripting.forceWrite(false);
+SPI1.misoPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+SPI1.misoPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric4";
+
+/* 共享总线：八路巡线 0x12，JY901S 0x50。 */
+I2C1.$name                              = "I2C_GRAY";
+I2C1.basicEnableController              = true;
+I2C1.basicControllerBusSpeed            = 100000;
+I2C1.advControllerRXFIFOTRIG            = "BYTES_8";
+I2C1.advControllerTXFIFOTRIG            = "BYTES_7";
+I2C1.peripheral.$assign                 = "I2C0";
+I2C1.peripheral.sdaPin.$assign          = "PA28";
+I2C1.peripheral.sclPin.$assign          = "PA31";
+I2C1.sdaPinConfig.$name                 = "ti_driverlib_gpio_GPIOPinGeneric5";
+I2C1.sclPinConfig.$name                 = "ti_driverlib_gpio_GPIOPinGeneric6";
+
+/* MSPM0 -> ESP32 日志，115200-8N1。 */
+UART1.$name                            = "UART_DEBUG";
+UART1.targetBaudRate                   = 115200;
+UART1.uartClkSrc                       = "MFCLK";
+UART1.peripheral.$assign               = "UART0";
+UART1.peripheral.txPin.$assign         = "PA10";
+UART1.peripheral.rxPin.$assign         = "PA11";
+UART1.txPinConfig.direction            = scripting.forceWrite("OUTPUT");
+UART1.txPinConfig.hideOutputInversion  = scripting.forceWrite(false);
+UART1.txPinConfig.onlyInternalResistor = scripting.forceWrite(false);
+UART1.txPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+UART1.txPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric7";
+UART1.rxPinConfig.hideOutputInversion  = scripting.forceWrite(false);
+UART1.rxPinConfig.onlyInternalResistor = scripting.forceWrite(false);
+UART1.rxPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
+UART1.rxPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric8";
+
+SYSCTL.forceDefaultClkConfig = true;
+SYSCTL.clockTreeEn           = true;
+const gate7 = system.clockTree["MFCLKGATE"];
+gate7.enable = true;
+
+/* 保留 PA20/PA19 给 J-Link SWD 调试烧录。 */
+Board.peripheral.$suggestSolution          = "DEBUGSS";
+Board.peripheral.swclkPin.$suggestSolution = "PA20";
+Board.peripheral.swdioPin.$suggestSolution = "PA19";

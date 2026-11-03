@@ -1,0 +1,187 @@
+menu "车载平衡滚球集中处理器"
+
+    menu "WS2812补光灯"
+        config GRM_FILL_LIGHT_ENABLE
+            bool "启用摄像头补光灯"
+            default y
+
+        config GRM_FILL_LIGHT_GPIO
+            int "WS2812 DIN GPIO"
+            range 0 48
+            default 21
+            depends on GRM_FILL_LIGHT_ENABLE
+
+        config GRM_FILL_LIGHT_LED_COUNT
+            int "串联灯珠数量"
+            range 1 64
+            default 8
+            depends on GRM_FILL_LIGHT_ENABLE
+
+        config GRM_FILL_LIGHT_BRIGHTNESS
+            int "白光亮度(0-255)"
+            range 0 255
+            default 64
+            depends on GRM_FILL_LIGHT_ENABLE
+            help
+                红绿蓝三个通道使用相同值。默认64约为25%通道亮度，
+                先避免近距离补光造成画面过曝，后续可按实拍效果调整。
+    endmenu
+
+    menu "无线网络"
+        config GRM_WIFI_CONNECT_ENABLE
+            bool "连接上位机所在Wi-Fi"
+            default n
+            help
+                开启后使用下方SSID/密码连接日志接收端所在网络。
+                视觉控制使用独立UART，不依赖该Wi-Fi连接。
+
+        config GRM_WIFI_SSID
+            string "Wi-Fi SSID"
+            default ""
+
+        config GRM_WIFI_PASSWORD
+            string "Wi-Fi 密码"
+            default ""
+
+        config GRM_WIFI_CONNECT_TIMEOUT_MS
+            int "录制通知等待 Wi-Fi 的最长时间(ms)"
+            range 1000 60000
+            default 15000
+
+    endmenu
+
+    menu "K230 视觉 UART"
+        config GRM_VISION_UART_PORT
+            int "UART端口"
+            range 0 2
+            default 1
+
+        config GRM_VISION_UART_RX_PIN
+            int "ESP32 RX GPIO（接K230 TX）"
+            range 0 48
+            default 46
+
+        config GRM_VISION_UART_TX_PIN
+            int "ESP32 TX GPIO（接K230 RX）"
+            range 0 48
+            default 13
+
+        config GRM_VISION_UART_BAUD
+            int "波特率"
+            range 9600 2000000
+            default 115200
+
+        config GRM_TARGET_LIMIT_MM
+            int "目标位置绝对值上限(mm)"
+            range 1 120
+            default 110
+    endmenu
+
+    menu "天猛星 G3507 日志串口"
+        config GRM_TMX_UART_ENABLE
+            bool "启用 TMX UART"
+            default y
+
+        config GRM_TMX_UART_PORT
+            int "UART 端口"
+            range 1 2
+            default 2
+
+        config GRM_TMX_UART_RX_PIN
+            int "ESP32 RX GPIO（接 G3507 PA10/TX）"
+            range 0 48
+            default 11
+
+        config GRM_TMX_UART_BAUD
+            int "波特率"
+            range 9600 2000000
+            default 115200
+    endmenu
+
+    menu "JY901S加速度I2C"
+        config GRM_JY901S_I2C_ENABLE
+            bool "启用JY901S I2C"
+            default y
+
+        config GRM_JY901S_I2C_PORT
+            int "I2C端口"
+            range 0 1
+            default 0
+
+        config GRM_JY901S_I2C_SDA_PIN
+            int "SDA GPIO"
+            range 0 48
+            default 16
+
+        config GRM_JY901S_I2C_SCL_PIN
+            int "SCL GPIO"
+            range 0 48
+            default 15
+
+        config GRM_JY901S_I2C_CLOCK_HZ
+            int "I2C时钟频率(Hz)"
+            range 10000 400000
+            default 100000
+
+        config GRM_JY901S_X_BIAS_MG
+            int "X轴静止零偏(mg)"
+            range -1000 1000
+            default 15
+            help
+                当前安装方向实测静止均值为+15mg。纵向动态加速度等于
+                低通后的X轴读数减去该零偏。
+
+        config GRM_JY901S_X_FILTER_DIVISOR
+            int "X轴一阶低通分母"
+            range 1 32
+            default 4
+            help
+                每20ms执行 filtered += (raw-filtered)/divisor。
+                数值越大滤波越强，但前馈响应也越慢。
+    endmenu
+
+    menu "上位机 UDP 日志"
+        config GRM_UDP_LOG_ENABLE
+            bool "通过 Wi-Fi 广播控制日志"
+            default y
+
+        config GRM_UDP_LOG_HOST
+            string "日志广播地址"
+            default "255.255.255.255"
+
+        config GRM_UDP_LOG_PORT
+            int "日志 UDP 端口"
+            range 1 65535
+            default 9011
+    endmenu
+
+    menu "旧版录像通知组件"
+        config GRM_RECORDER_ENABLE
+            bool "启用旧版 UDP 9010 JSON 通知"
+            default n
+            help
+                当前系统不再启动该组件。上位机从UDP 9011收到的TMX
+                TASK_BEGIN/TASK_END原始日志控制录像，此配置仅保留旧组件的
+                独立编译兼容性。
+
+        config GRM_RECORDER_HOST
+            string "旧版通知地址"
+            default "255.255.255.255"
+
+        config GRM_RECORDER_PORT
+            int "旧版通知端口"
+            range 1 65535
+            default 9010
+
+        config GRM_RECORDER_REPEAT_COUNT
+            int "旧版事件重复次数"
+            range 1 5
+            default 3
+
+        config GRM_RECORDER_REPEAT_INTERVAL_MS
+            int "旧版重复间隔(ms)"
+            range 10 1000
+            default 80
+    endmenu
+
+endmenu

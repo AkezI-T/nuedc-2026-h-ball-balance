@@ -1,0 +1,19 @@
+# CCS 构建输出
+Debug/
+Release/
+
+# 编译中间文件
+*.o
+*.obj
+*.d
+*.out
+*.map
+*.hex
+*.bin
+
+# 操作系统临时文件
+Thumbs.db
+.DS_Store
+
+# 本地实车运行日志
+logs/

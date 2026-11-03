@@ -1,0 +1,69 @@
+# 构建产物与编译中间文件
+**/build/
+**/Debug/
+**/Release/
+**/.build/
+*.o
+*.obj
+*.d
+*.out
+*.map
+*.hex
+*.bin
+*.elf
+CMakeCache.txt
+CMakeFiles/
+
+# Python 环境
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+dist/
+*.egg-info/
+
+# ESP-IDF 本地配置（含凭据，不入库）
+sdkconfig
+sdkconfig.old
+sdkconfig.defaults
+managed_components/
+
+# 日志、录像与保存数据
+logs/
+Logs/
+Save/
+
+# 本地临时与缓存
+tmp/
+.cache/
+.clangd/
+compile_commands.json
+
+# IDE 与编辑器个人配置
+.vscode/
+.idea/
+.theia/
+.settings/
+.kilo/
+node_modules/
+
+# 系统文件
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 分发压缩包
+K230VideoReceiver.zip
+
+# 本地建模输出，不入库
+output/
+
+# 个人环境与敏感文件
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
